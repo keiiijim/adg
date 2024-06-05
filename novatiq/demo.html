@@ -1,0 +1,87 @@
+
+<html>
+<head>
+	<script async src="https://securepubads.g.doubleclick.net/tag/js/gpt.js"></script>
+
+	<!--
+	<script async src="https://www.googletagservices.com/tag/js/gpt.js"></script>
+	-->
+
+	<!-- Variables must be set ** AFTER **  this line -->
+	<script src="novatiq_gam_integration.js"></script>
+
+	<script>
+		///////////////////////////////////////////////////////
+		// Set vars here
+
+		// if adform_sspId is not blank that value will be used for any adform calls
+		// otherwise sspId will be used
+		// adform_sspId = "yyy"
+
+		sspId = 'xxx';
+		pubId = 'demopublisher';
+		dspUser = 'novademo';
+		clientID = "novatiq";
+
+		// none = programmatic (gam - returns audiences)
+		// adform = adform only
+		// both = both (returns audiences)
+		adformIntegration = "none";
+		///////////////////////////////////////////////////////
+
+		doSync();
+	</script>
+</head>
+
+<body>
+	<h1>
+		Novatiq test integration script demo
+	</h1>
+
+	<!-- Define a div for the ad unit -->
+	<div id="adContainer" style="width: 300px; height: 250px;">
+			<!-- Ad will be displayed here -->
+<!--		<script>-->
+<!--			googletag.cmd.push(() => {-->
+<!--				// Request and render an ad for the "banner-ad" slot.-->
+<!--				googletag.display("adContainer");-->
+<!--			});-->
+<!--		</script>-->
+	</div>
+
+	<div id="banner-ad" style="width: 300px; height: 250px;">
+		<script>
+			function showAd(segments) {
+				console.log("showad called with", segments);
+
+				googletag.cmd.push(function () {
+					console.log("Banner Ad Display method Called!");
+
+					// Define your ad unit
+					var adUnitPath = '/18339668/test-delivery/test_openbidding';
+
+					var slot = googletag.defineSlot(adUnitPath, [300, 250], 'adContainer')
+						.addService(googletag.pubads());
+
+					logLine("data: " + segments);
+					slot.clearTargeting();
+					slot.setTargeting('novatiq_sgmnt_id', segments);
+					logLine("Added Segment Id: " + segments);
+
+//					initialiseEncryptedSignals();
+
+					googletag.pubads().enableSingleRequest();
+
+					googletag.enableServices();
+
+					googletag.display("adContainer");
+					 googletag.pubads().refresh();
+					console.log("Refresh!");
+				});
+			}
+		</script>
+	</div>
+</body>
+</html>
+
+
