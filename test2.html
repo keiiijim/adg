@@ -41,6 +41,8 @@
 
         var auctionStartTime;
         var novatiqIdTime;
+        var spadsyncStartTime;
+        var spadsyncEndTime;
 
         pbjs.que.push(function() {
             pbjs.setConfig({
@@ -61,9 +63,28 @@
                                 console.log('NovatiqID module called at: ' + novatiqIdTime + 'ms');
                                 var novatiqResult = document.getElementById('novatiqIdTimeResult');
                                 novatiqResult.textContent = 'NovatiqID module called at: ' + novatiqIdTime + 'ms';
+
+                                spadsyncStartTime = performance.now();  // spadsync.com通信開始時間を記録
+
+                                // 通信完了時間を計測するためのXHRオブジェクトの作成
+                                var xhr = new XMLHttpRequest();
+                                xhr.open('GET', 'https://spadsync.com');  // 実際のURLを使用
+                                xhr.onreadystatechange = function() {
+                                    if (xhr.readyState === 4) {
+                                        spadsyncEndTime = performance.now();  // spadsync.com通信完了時間を記録
+                                        console.log('spadsync.com response received at: ' + spadsyncEndTime + 'ms');
+                                        var spadsyncResult = document.getElementById('spadsyncTimeResult');
+                                        spadsyncResult.textContent = 'spadsync.com response received at: ' + spadsyncEndTime + 'ms';
+
+                                        var totalSpadsyncTime = spadsyncEndTime - spadsyncStartTime;
+                                        var totalSpadsyncResult = document.getElementById('totalSpadsyncTimeResult');
+                                        totalSpadsyncResult.textContent = 'Total spadsync.com time: ' + totalSpadsyncTime + 'ms';
+                                    }
+                                };
+                                xhr.send();
                             }
-                        }
-                    }]
+                        }]
+                    }
                 }
             });
             
@@ -138,6 +159,14 @@
         <div id="novatiqIdResult">
             <p>NovatiqID module call time:</p>
             <p id="novatiqIdTimeResult">Calculating...</p>
+        </div>
+        <div id="spadsyncResult">
+            <p>spadsync.com response time:</p>
+            <p id="spadsyncTimeResult">Calculating...</p>
+        </div>
+        <div id="totalSpadsyncResult">
+            <p>Total spadsync.com time:</p>
+            <p id="totalSpadsyncTimeResult">Calculating...</p>
         </div>
         <script>
             setTimeout(function() {
