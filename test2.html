@@ -29,7 +29,6 @@
             }
         ];
 
-        // ======== DO NOT EDIT BELOW THIS LINE =========== //
         var googletag = googletag || {};
         googletag.cmd = googletag.cmd || [];
         googletag.cmd.push(function() {
@@ -40,9 +39,31 @@
         pbjs.que = pbjs.que || [];
 
         var auctionStartTime;
-        var novatiqIdTime;
-        var spadsyncStartTime;
-        var spadsyncEndTime;
+        var novatiqStartTime;
+        var novatiqEndTime;
+
+        // Log interception function
+        (function() {
+            var originalLog = console.log;
+            console.log = function(message) {
+                originalLog.apply(console, arguments);
+
+                if (typeof message === 'string') {
+                    if (message.includes('INFO: User ID - usersync config updated for 1 submodules:')) {
+                        novatiqStartTime = performance.now();
+                        console.log('Novatiq start time: ' + novatiqStartTime + 'ms');
+                    }
+                    if (message.includes('INFO: NOVATIQ *** ASYNC request returned 204')) {
+                        novatiqEndTime = performance.now();
+                        console.log('Novatiq end time: ' + novatiqEndTime + 'ms');
+
+                        var novatiqTotalTime = novatiqEndTime - novatiqStartTime;
+                        var novatiqResult = document.getElementById('novatiqTotalTimeResult');
+                        novatiqResult.textContent = 'Novatiq total time: ' + novatiqTotalTime + 'ms';
+                    }
+                }
+            }
+        })();
 
         pbjs.que.push(function() {
             pbjs.setConfig({
@@ -57,31 +78,6 @@
                                 useStandardUuid: true,
                                 useSspId: false,
                                 useSspHost: false
-                            },
-                            callback: function() {
-                                novatiqIdTime = performance.now();  // NovatiqIDモジュールの呼び出し時間を記録
-                                console.log('NovatiqID module called at: ' + novatiqIdTime + 'ms');
-                                var novatiqResult = document.getElementById('novatiqIdTimeResult');
-                                novatiqResult.textContent = 'NovatiqID module called at: ' + novatiqIdTime + 'ms';
-
-                                spadsyncStartTime = performance.now();  // spadsync.com通信開始時間を記録
-
-                                // 通信完了時間を計測するためのXHRオブジェクトの作成
-                                var xhr = new XMLHttpRequest();
-                                xhr.open('GET', 'https://spadsync.com');  // 実際のURLを使用
-                                xhr.onreadystatechange = function() {
-                                    if (xhr.readyState === 4) {
-                                        spadsyncEndTime = performance.now();  // spadsync.com通信完了時間を記録
-                                        console.log('spadsync.com response received at: ' + spadsyncEndTime + 'ms');
-                                        var spadsyncResult = document.getElementById('spadsyncTimeResult');
-                                        spadsyncResult.textContent = 'spadsync.com response received at: ' + spadsyncEndTime + 'ms';
-
-                                        var totalSpadsyncTime = spadsyncEndTime - spadsyncStartTime;
-                                        var totalSpadsyncResult = document.getElementById('totalSpadsyncTimeResult');
-                                        totalSpadsyncResult.textContent = 'Total spadsync.com time: ' + totalSpadsyncTime + 'ms';
-                                    }
-                                };
-                                xhr.send();
                             }
                         }]
                     }
@@ -156,17 +152,9 @@
             <p>Auction delay:</p>
             <p id="auctionDelayResult">Calculating...</p>
         </div>
-        <div id="novatiqIdResult">
-            <p>NovatiqID module call time:</p>
-            <p id="novatiqIdTimeResult">Calculating...</p>
-        </div>
-        <div id="spadsyncResult">
-            <p>spadsync.com response time:</p>
-            <p id="spadsyncTimeResult">Calculating...</p>
-        </div>
-        <div id="totalSpadsyncResult">
-            <p>Total spadsync.com time:</p>
-            <p id="totalSpadsyncTimeResult">Calculating...</p>
+        <div id="novatiqResult">
+            <p>Novatiq total time:</p>
+            <p id="novatiqTotalTimeResult">Calculating...</p>
         </div>
         <script>
             setTimeout(function() {
