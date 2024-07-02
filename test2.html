@@ -29,6 +29,7 @@
             }
         ];
 
+        // ======== DO NOT EDIT BELOW THIS LINE =========== //
         var googletag = googletag || {};
         googletag.cmd = googletag.cmd || [];
         googletag.cmd.push(function() {
@@ -38,7 +39,6 @@
         var pbjs = pbjs || {};
         pbjs.que = pbjs.que || [];
 
-        var auctionStartTime;
         var novatiqStartTime;
         var novatiqEndTime;
 
@@ -49,20 +49,22 @@
                 originalLog.apply(console, arguments);
 
                 if (typeof message === 'string') {
-                    if (message.includes('INFO: User ID - usersync config updated for 1 submodules:')) {
+                    if (message.includes('User ID - usersync config updated for 1 submodules')) {
                         novatiqStartTime = performance.now();
                         console.log('Novatiq start time: ' + novatiqStartTime + 'ms');
                     }
-                    if (message.includes('INFO: NOVATIQ *** ASYNC request returned 204')) {
+                    if (message.includes('NOVATIQ Sync Response Code')) {
                         novatiqEndTime = performance.now();
                         console.log('Novatiq end time: ' + novatiqEndTime + 'ms');
 
                         var novatiqTotalTime = novatiqEndTime - novatiqStartTime;
+                        console.log('Novatiq total time: ' + novatiqTotalTime + 'ms');
+
                         var novatiqResult = document.getElementById('novatiqTotalTimeResult');
                         novatiqResult.textContent = 'Novatiq total time: ' + novatiqTotalTime + 'ms';
                     }
                 }
-            }
+            };
         })();
 
         pbjs.que.push(function() {
@@ -79,29 +81,15 @@
                                 useSspId: false,
                                 useSspHost: false
                             }
-                        }
-                    }]
+                        }]
+                    }
                 }
-            }
-        });
+            });
             
-
             pbjs.addAdUnits(adUnits);
 
-            auctionStartTime = performance.now();  // オークション開始時間を記録
-
             pbjs.requestBids({
-                bidsBackHandler: function() {
-                    var auctionEndTime = performance.now();
-                    var auctionDelay = auctionEndTime - auctionStartTime;
-                    console.log('Auction delay: ' + auctionDelay + 'ms');
-
-                    // 結果を表示するためのHTML要素に値を設定
-                    var auctionResult = document.getElementById('auctionDelayResult');
-                    auctionResult.textContent = 'Auction delay: ' + auctionDelay + 'ms';
-
-                    initAdserver();
-                },
+                bidsBackHandler: initAdserver,
                 timeout: PREBID_TIMEOUT
             });
         });
@@ -127,6 +115,7 @@
             googletag.pubads().enableSingleRequest();
             googletag.enableServices();
         });
+
     </script>
 </head>
 <body>
@@ -149,10 +138,6 @@
             <br>
             <p>Response code:</p>
             <p id="resulttext2"></p>
-        </div>
-        <div id="auctionResult">
-            <p>Auction delay:</p>
-            <p id="auctionDelayResult">Calculating...</p>
         </div>
         <div id="novatiqResult">
             <p>Novatiq total time:</p>
